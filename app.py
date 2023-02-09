@@ -11,10 +11,9 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tqdm.notebook import tqdm
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.urandom(24)
 
 MODEL_DIR = './Model/best_model.h5'
-model = VGG16()
-model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
 
 all_captions = []
 tokenizer = Tokenizer()
@@ -81,7 +80,7 @@ def predict_caption(loaded_model, image, tokenizer, max_length):
     return in_text
 
 
-def generate_caption(image_path, loaded_model):
+def generate_caption(image_path, loaded_model, model):
     image = load_img(image_path, target_size=(224, 224))
     # convert image pixels to numpy array
     image = img_to_array(image)
@@ -91,8 +90,10 @@ def generate_caption(image_path, loaded_model):
     image = preprocess_input(image)
     # extract features
     feature = model.predict(image, verbose=0)
+    print('Feature: ', feature)
     # tokenize captions
     max_length = tokenize_captions()
+    print('Max Length: ', max_length)
 
     image = Image.open(image_path)
     # predict the caption
@@ -104,13 +105,23 @@ def generate_caption(image_path, loaded_model):
 @app.route('/api/generate', methods=['POST'])
 def generate():
     if 'image' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
+        print('error')
+        return jsonify({'data': "No file found"})
     image_file = request.files['image']
+    model = VGG16()
+    model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
+    print('Image File: ', image_file)
+    print('Model: ', model)
     loaded_model = load_model(MODEL_DIR)
-    predicted_caption = generate_caption(image_file, loaded_model)
+    print('Loaded Model: ', loaded_model)
+    predicted_caption = generate_caption(image_file, loaded_model, model)
     data = {'caption': predicted_caption}
     return jsonify(data)
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({'data': "Hello World"})
 
 
 if __name__ == '__main__':
