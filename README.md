@@ -15,6 +15,6 @@ The steps to run the website locally are as follows:
 # Demo
 
 Example Caption Image 1
-[Example 1](/public/ex1.png)
+<img src="/public/ex1.png" alt="Example1" width="100" height="100"/>
 Example Caption Image 2
-[Example 2](/public/ex2.png)
+<img src="/public/ex2.png" alt="Example1" width="100" height="100"/>
