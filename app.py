@@ -1,4 +1,5 @@
 from flask import Flask, request, flash, redirect, jsonify
+from flask_cors import CORS
 from keras.models import load_model
 import os
 import numpy as np
@@ -12,6 +13,7 @@ from tqdm.notebook import tqdm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
+CORS(app)
 
 MODEL_DIR = './Model/best_model.h5'
 
@@ -108,14 +110,19 @@ def generate():
         print('error')
         return jsonify({'data': "No file found"})
     image_file = request.files['image']
+    print('Image File: ', image_file)
+    image_file.save(image_file.filename)
     model = VGG16()
     model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
     print('Image File: ', image_file)
     print('Model: ', model)
     loaded_model = load_model(MODEL_DIR)
     print('Loaded Model: ', loaded_model)
-    predicted_caption = generate_caption(image_file, loaded_model, model)
+    predicted_caption = generate_caption(
+        image_file.filename, loaded_model, model)
+    os.remove(image_file.filename)
     data = {'caption': predicted_caption}
+
     return jsonify(data)
 
 
