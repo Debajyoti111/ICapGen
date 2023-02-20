@@ -11,6 +11,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tqdm.notebook import tqdm
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 CORS(app)
